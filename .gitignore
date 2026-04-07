@@ -1,3 +1,4 @@
 /.idea/
 /venv/
-/src/untitled.ui
+/src/design.ui
+/data/trains.json

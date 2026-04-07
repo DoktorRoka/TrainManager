@@ -12,14 +12,33 @@ class FileManager(IFileHandler):
             json.dump(dict_data, f, ensure_ascii=False, indent=4)
 
     def load_from_file(self, filename: str) -> list:
+        # Создаем папку, если ее нет (чтобы не было ошибки FileNotFoundError)
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+        # Если файла еще нет, создаем его пустым и возвращаем пустой список
         if not os.path.exists(filename):
-            return[]
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump([], f, ensure_ascii=False)
+            return []
 
         with open(filename, 'r', encoding='utf-8') as f:
             try:
                 dict_data = json.load(f)
             except json.JSONDecodeError:
-                return[]
+                return []  # Если файл пустой или поврежден
+
+        # Восстанавливаем объекты из словарей
+        trains = []
+        for item in dict_data:
+            if item["type"] == "Passenger":
+                train = PassengerTrain(item["train_id"], item["destination"], item["passengers_count"])
+                train.status = item["status"]
+                trains.append(train)
+            elif item["type"] == "Cargo":
+                train = CargoTrain(item["train_id"], item["destination"], item["cargo_weight"])
+                train.status = item["status"]
+                trains.append(train)
+        return trains
 
 
         trains = []

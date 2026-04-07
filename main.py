@@ -3,7 +3,6 @@ import traceback
 from PyQt6.QtWidgets import QApplication
 from src.main_gui import DispatchWindow
 
-# Эта функция перехватывает тихие краши PyQt и выводит их в консоль текстом
 def excepthook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
     print("\n--- ПРОИЗОШЛА ОШИБКА ---")

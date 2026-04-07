@@ -1,4 +1,5 @@
 import os
+import sys
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
 from src.design import Ui_MainWindow
 from src.logic import StationManager, FileManager
@@ -12,9 +13,14 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
 
         self.station = StationManager()
         self.file_manager = FileManager()
-        self.data_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'trains.json')
+        if hasattr(sys, '__compiled__') or getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.argv[0])
+        else:
+            base_dir = os.path.join(os.path.dirname(__file__), '..')
 
-        # Привязка кнопок
+        self.data_file_path = os.path.join(base_dir, 'data', 'trains.json')
+
+        # Привязки
         self.btn_refresh.clicked.connect(self.update_table)
         self.btn_delete.clicked.connect(self.delete_train)
         self.btn_add.clicked.connect(self.add_train)

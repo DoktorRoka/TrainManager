@@ -1,8 +1,11 @@
+import sys
 import os
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
 from src.design import Ui_MainWindow
-from src.logic import StationManager, FileManager
-from src.models import PassengerTrain, CargoTrain
+from src.station_manager import StationManager
+from src.file_manager import FileManager
+from src.passenger_train import PassengerTrain
+from src.cargo_train import CargoTrain
 
 
 class DispatchWindow(QMainWindow, Ui_MainWindow):
@@ -12,19 +15,21 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
 
         self.station = StationManager()
         self.file_manager = FileManager()
-        self.data_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'trains.json')
 
-        # Привязка кнопок
+        if hasattr(sys, 'frozen') or hasattr(sys, '__compiled__'):
+            base_dir = os.path.dirname(os.path.abspath(sys.executable))
+        else:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+        self.data_file_path = os.path.join(base_dir, 'data', 'trains.json')
+
         self.btn_refresh.clicked.connect(self.update_table)
         self.btn_delete.clicked.connect(self.delete_train)
         self.btn_add.clicked.connect(self.add_train)
         self.btn_change_status.clicked.connect(self.change_status)
-
-        # Кнопки ручного сохранения/загрузки
         self.btn_save.clicked.connect(lambda: self.save_data(silent=False))
         self.btn_load.clicked.connect(lambda: self.load_data(silent=False))
 
-        # === АВТОЗАГРУЗКА ПРИ ЗАПУСКЕ ===
         self.load_data(silent=True)
 
     def update_table(self):
@@ -70,8 +75,6 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
             self.input_param.clear()
 
             self.update_table()
-
-            # === АВТОСОХРАНЕНИЕ ===
             self.save_data(silent=True)
             QMessageBox.information(self, "Успех", "Рейс успешно добавлен!")
         except ValueError:
@@ -86,8 +89,6 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
         train_id = self.table_trains.item(selected_row, 0).text()
         self.station.remove_train(train_id)
         self.update_table()
-
-        # === АВТОСОХРАНЕНИЕ ===
         self.save_data(silent=True)
 
     def change_status(self):
@@ -100,32 +101,23 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
 
         self.station.change_status(train_id, new_status)
         self.update_table()
-
-        # === АВТОСОХРАНЕНИЕ ===
         self.save_data(silent=True)
         QMessageBox.information(self, "Успех", f"Статус поезда {train_id} изменен на '{new_status}'")
 
     def save_data(self, silent=False):
-        """Сохраняет данные. Если silent=True, не показывает всплывающее окно."""
         self.file_manager.save_to_file(self.data_file_path, self.station.trains)
-
-        # Пишем в лог, было ли это автосохранение или ручное
         log_msg = "Автосохранение данных." if silent else "Данные успешно сохранены вручную."
         self.station.write_log(log_msg)
         self.update_logs()
-
         if not silent:
             QMessageBox.information(self, "Сохранение", "Данные сохранены в файл trains.json!")
 
     def load_data(self, silent=False):
-        """Загружает данные. Если silent=True, не показывает всплывающее окно."""
         loaded_trains = self.file_manager.load_from_file(self.data_file_path)
         self.station.trains = loaded_trains
-
         log_msg = "Данные автоматически загружены при старте." if silent else "Данные загружены вручную."
         self.station.write_log(log_msg)
         self.update_table()
-
         if not silent:
             QMessageBox.information(self, "Загрузка", "Данные успешно загружены!")
 

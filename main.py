@@ -1,7 +1,7 @@
 import sys
 import traceback
 from PyQt6.QtWidgets import QApplication
-from src.main_gui import DispatchWindow
+from src.dispatch_window import DispatchWindow
 
 def excepthook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))

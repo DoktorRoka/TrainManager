@@ -13,12 +13,17 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
 
         self.station = StationManager()
         self.file_manager = FileManager()
-        if hasattr(sys, '__compiled__') or getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.argv[0])
+        if hasattr(sys, 'frozen') or hasattr(sys, '__compiled__'):
+            base_dir = os.path.dirname(os.path.abspath(sys.executable))
         else:
-            base_dir = os.path.join(os.path.dirname(__file__), '..')
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+            # 2. Формируем путь к файлу данных
         self.data_file_path = os.path.join(base_dir, 'data', 'trains.json')
+
+        # Печатаем путь в консоль для отладки (если консоль включена, увидишь где он ищет)
+        print(f"DEBUG: Путь к данным: {self.data_file_path}")
+
 
         # Привязки
         self.btn_refresh.clicked.connect(self.update_table)

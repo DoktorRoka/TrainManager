@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
 class AbstractTrain(ABC):
-    def __init__(self, train_id: str, destination: str):
+    def __init__(self, train_id: str, route: str, wagons_count: int):
         self.train_id = train_id
-        self.destination = destination
+        self.route = route
+        self.wagons_count = wagons_count
         self.status = "Ожидает"
 
     @abstractmethod

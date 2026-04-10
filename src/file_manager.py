@@ -30,11 +30,17 @@ class FileManager(IFileHandler):
         trains = []
         for item in dict_data:
             if item["type"] == "Passenger":
-                train = PassengerTrain(item["train_id"], item["destination"], item["passengers_count"])
+                train = PassengerTrain(
+                    item["train_id"], item["route"], item["wagons_count"],
+                    item.get("wagon_types", ""), item.get("services", "")
+                )
                 train.status = item["status"]
                 trains.append(train)
             elif item["type"] == "Cargo":
-                train = CargoTrain(item["train_id"], item["destination"], item["cargo_weight"])
+                train = CargoTrain(
+                    item["train_id"], item["route"], item["wagons_count"],
+                    item.get("cargo_type", ""), item.get("cargo_weight", 0.0)
+                )
                 train.status = item["status"]
                 trains.append(train)
         return trains

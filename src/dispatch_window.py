@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox, QHeaderView
+from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
 from src.design import Ui_MainWindow
 from src.station_manager import StationManager
 from src.file_manager import FileManager

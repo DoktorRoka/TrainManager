@@ -1,6 +1,8 @@
 import sys
 import os
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
 from src.design import Ui_MainWindow
 from src.station_manager import StationManager
 from src.file_manager import FileManager
@@ -17,11 +19,11 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
         self.file_manager = FileManager()
 
         if hasattr(sys, 'frozen') or hasattr(sys, '__compiled__'):
-            base_dir = os.path.dirname(os.path.abspath(sys.executable))
+            self.base_dir = os.path.dirname(os.path.abspath(sys.executable))
         else:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            self.base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-        self.data_file_path = os.path.join(base_dir, 'data', 'trains.json')
+        self.data_file_path = os.path.join(self.base_dir, 'data', 'trains.json')
 
         # Привязка кнопок
         self.btn_refresh.clicked.connect(self.update_table)
@@ -38,8 +40,20 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
         self.load_data(silent=True)
 
     def toggle_fields(self):
-        """Включает и выключает поля ввода в зависимости от типа поезда"""
+        """Включает поля ввода и МЕНЯЕТ КАРТИНКУ в зависимости от типа поезда"""
         is_passenger = (self.combo_type.currentText() == "Пассажирский")
+
+        # Меняем картинку
+        if is_passenger:
+            img_path = os.path.join(self.base_dir, 'assets', 'passenger.jpg')
+        else:
+            img_path = os.path.join(self.base_dir, 'assets', 'cargo.jpg')
+
+        # Загружаем картинку, если файл существует
+        if os.path.exists(img_path):
+            self.label_image.setPixmap(QPixmap(img_path))
+        else:
+            self.label_image.setText("Картинка не найдена")
 
         # Поля пассажирского
         self.input_services.setEnabled(is_passenger)
@@ -49,13 +63,29 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
         self.input_cargo_type.setEnabled(not is_passenger)
         self.input_cargo_weight.setEnabled(not is_passenger)
 
-        # Очищаем неактивные поля для красоты
+        # Очищаем неактивные поля
         if is_passenger:
             self.input_cargo_type.clear()
             self.input_cargo_weight.clear()
         else:
             self.input_services.clear()
             self.input_wagon_types.clear()
+
+    def update_statistics(self):
+        """Вычисляет и выводит статистику по станции"""
+        total = len(self.station.trains)
+        passenger_count = sum(1 for t in self.station.trains if isinstance(t, PassengerTrain))
+        cargo_count = sum(1 for t in self.station.trains if isinstance(t, CargoTrain))
+        delayed = sum(1 for t in self.station.trains if t.status == "Задерживается")
+
+        stats_text = (
+            f"📊 Общее количество рейсов: {total}\n"
+            f"🧑‍🤝‍🧑 Пассажирских поездов: {passenger_count}\n"
+            f"📦 Грузовых поездов: {cargo_count}\n"
+            f"⚠️ Задерживается: {delayed}"
+        )
+        # Если в Qt Designer ты назвал Label по-другому, поменяй тут имя
+        self.label_stats.setText(stats_text)
 
     def update_table(self):
         # Очищаем только строки, заголовки остаются те, что из Qt Designer
@@ -88,7 +118,7 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
             self.combo_trains.addItem(train.train_id)
 
         self.table_trains.resizeColumnsToContents()
-
+        self.update_statistics()
         self.update_logs()
 
     def add_train(self):

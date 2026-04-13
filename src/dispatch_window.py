@@ -1,8 +1,6 @@
 import sys
 import os
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtCore import Qt
 from src.design import Ui_MainWindow
 from src.station_manager import StationManager
 from src.file_manager import FileManager
@@ -43,17 +41,7 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
         """Включает поля ввода и МЕНЯЕТ КАРТИНКУ в зависимости от типа поезда"""
         is_passenger = (self.combo_type.currentText() == "Пассажирский")
 
-        # Меняем картинку
-        if is_passenger:
-            img_path = os.path.join(self.base_dir, 'assets', 'passenger.jpg')
-        else:
-            img_path = os.path.join(self.base_dir, 'assets', 'cargo.jpg')
 
-        # Загружаем картинку, если файл существует
-        if os.path.exists(img_path):
-            self.label_image.setPixmap(QPixmap(img_path))
-        else:
-            self.label_image.setText("Картинка не найдена")
 
         # Поля пассажирского
         self.input_services.setEnabled(is_passenger)

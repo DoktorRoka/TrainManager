@@ -72,11 +72,9 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
             f"📦 Грузовых поездов: {cargo_count}\n"
             f"⚠️ Задерживается: {delayed}"
         )
-        # Если в Qt Designer ты назвал Label по-другому, поменяй тут имя
         self.label_stats.setText(stats_text)
 
     def update_table(self):
-        # Очищаем только строки, заголовки остаются те, что из Qt Designer
         self.table_trains.setRowCount(0)
         self.combo_trains.clear()
 
@@ -137,7 +135,7 @@ class DispatchWindow(QMainWindow, Ui_MainWindow):
             self.input_train_id.clear()
             self.input_route.clear()
             self.input_wagons.clear()
-            self.toggle_fields()  # Сбросит остальные поля
+            self.toggle_fields()
 
             self.update_table()
             self.save_data(silent=True)
